@@ -1,0 +1,307 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+body {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: #cfcfd4;
+  cursor: default;
+  user-select: none;
+}
+
+canvas {
+  display: block;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+/* --- overlays --- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 10;
+}
+
+.menu {
+  background: radial-gradient(ellipse at center, #0b0b0f 0%, #000 100%);
+}
+
+.menu-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+
+.title {
+  font-size: 42px;
+  font-weight: 400;
+  letter-spacing: 8px;
+  text-transform: lowercase;
+  color: #d8d8de;
+}
+.title.small {
+  font-size: 26px;
+}
+
+.tagline {
+  font-size: 13px;
+  line-height: 1.7;
+  letter-spacing: 1px;
+  opacity: 0.6;
+  max-width: 340px;
+}
+
+.pause {
+  background: rgba(4, 4, 6, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 300px;
+  margin-top: 6px;
+  padding: 16px;
+  border: 1px solid #2a2a30;
+  background: rgba(0, 0, 0, 0.4);
+}
+.settings label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  opacity: 0.85;
+}
+.settings label.check {
+  justify-content: flex-start;
+}
+.settings input[type='range'] {
+  flex: 1;
+  accent-color: #b0454a;
+}
+.settings input[type='checkbox'] {
+  accent-color: #b0454a;
+}
+.seed-input {
+  width: 100%;
+  background: #0c0c10;
+  border: 1px solid #33333a;
+  color: #cfcfd4;
+  font: inherit;
+  font-size: 12px;
+  padding: 6px 8px;
+  letter-spacing: 1px;
+}
+
+.subtitle {
+  font-size: 14px;
+  letter-spacing: 2px;
+  opacity: 0.85;
+}
+.subtitle.dead {
+  color: #b0454a;
+}
+.subtitle.escaped {
+  color: #6fa06f;
+}
+
+.btn {
+  background: none;
+  border: 1px solid #55555f;
+  color: #d8d8de;
+  padding: 10px 28px;
+  font: inherit;
+  letter-spacing: 3px;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.btn:hover {
+  background: #d8d8de;
+  color: #000;
+}
+.btn.ghost {
+  border-color: #33333a;
+  font-size: 12px;
+  padding: 6px 18px;
+}
+
+.hint {
+  margin-top: 22px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  opacity: 0.4;
+}
+
+/* --- HUD --- */
+.hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.crosshair {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: rgba(220, 220, 228, 0.3);
+}
+
+/* --- diegetic blink overlay --- */
+.diegetic {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.grade {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.eyelid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  background: #000;
+  /* soft inner edge, like a lid */
+  box-shadow: 0 0 26px 20px #000;
+  transition: height 0.08s linear;
+}
+.eyelid.top {
+  top: 0;
+  border-bottom: 1px solid #000;
+}
+.eyelid.bottom {
+  bottom: 0;
+  border-top: 1px solid #000;
+}
+.blackout {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  /* near-instant: a blink is 40–500ms and should read as a hard cut */
+  transition: opacity 0.02s linear;
+}
+
+/* --- pickup (hold to collect) --- */
+.pickup {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.15s;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: #ffd27a;
+}
+.pickup-track {
+  width: 120px;
+  height: 3px;
+  margin: 0 auto 6px;
+  background: rgba(255, 210, 122, 0.25);
+}
+.pickup-fill {
+  height: 100%;
+  width: 0;
+  background: #ffd27a;
+}
+
+/* --- grab / struggle --- */
+.grab-layer {
+  position: absolute;
+  inset: -20px;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.grab-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(120, 0, 0, 0) 30%, rgba(90, 0, 0, 0.85) 100%);
+}
+.grab-hint {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #ffdede;
+  font-size: 22px;
+  letter-spacing: 6px;
+  text-shadow: 0 0 12px #900;
+}
+.grab-track {
+  width: 260px;
+  height: 8px;
+  margin: 14px auto 0;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 120, 120, 0.5);
+}
+.grab-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #b0454a, #ff6b6b);
+}
+
+.lock-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  letter-spacing: 2px;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+/* --- debug map (dev) --- */
+.debug-map {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 20;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #333;
+  pointer-events: none;
+}
+.debug-map canvas {
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  image-rendering: pixelated;
+}
+.debug-map-label {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  opacity: 0.6;
+}
